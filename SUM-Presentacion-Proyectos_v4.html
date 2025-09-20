@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SUM VEHÍCULOS – Ventanilla – Slideshow</title>
+<style>
+:root{--bg:#0b0b0b;--panel:#111;--ink:#fff;--muted:#c7c7c7;--line:#222;--accent:#fff;}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);overflow:hidden;}
+
+/* Slideshow functionality */
+.slideshow-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+.slide{display:none;padding:36px 7vw;height:100vh;overflow-y:auto;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0b0b0b,#0f0f0f);position:relative;}
+.slide.active{display:block;}
+.slide.cover{padding:80px 9vw;background:#000;text-align:center;}
+
+/* Logo in top right */
+.logo {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  width: 120px;
+  height: auto;
+  z-index: 100;
+}
+
+/* Navigation */
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background 0.3s;
+}
+.nav-arrow:hover {background: rgba(255,255,255,0.2);}
+.prev {left: 20px;}
+.next {right: 20px;}
+
+.slide-counter {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+/* Original v3 styles - EXACTLY THE SAME */
+h1{font-size:44px;margin:0 0 8px}h2{font-size:28px;margin:0 0 10px}h3{font-size:16px;margin:16px 0 8px;color:#eee}h4{margin:10px 0 6px;font-size:14px;color:#ddd}
+p,li,td,th{color:#e6e6e6}.subtitle{color:#bbb;margin-top:4px}.meta{color:#9a9a9a;font-size:14px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.card{background:#0f0f0f;border:1px solid #1a1a1a;border-radius:12px;padding:16px}
+.badge{display:inline-block;border:1px solid #444;color:#fff;padding:6px 10px;border-radius:999px;font-size:13px}
+.table{width:100%;border-collapse:collapse;border:1px solid #222;border-radius:12px;overflow:hidden}
+.table th,.table td{padding:10px 12px;border-bottom:1px solid #222;text-align:left;vertical-align:top}
+.table thead th{background:#111;color:#ddd;font-size:13px}
+.small{font-size:12px;color:#c2c2c2}.section h2{letter-spacing:.3px}
+.pains p{margin:6px 0 14px;color:#eaeaea}
+.costs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.costs div{background:#101010;border:1px solid #1b1b1b;border-radius:10px;padding:10px}
+.vtl{position:relative;border-left:2px solid #222;margin:8px 0 0 10px;padding-left:18px}
+.vtl .row{display:grid;grid-template-columns:120px 14px 1fr;gap:8px;align-items:center;margin:8px 0}
+.vtl .date{color:#d0d0d0;font-size:12px}
+.vtl .dot{width:10px;height:10px;border-radius:50%;background:#fff;border:1px solid #888;margin-left:-6px}
+.vtl .desc{color:#eaeaea}
+.gantt{width:100%;height:auto;background:#0c0c0c;border:1px solid #222;border-radius:12px}
+.gantt-wrap{margin-top:12px}
+.hint{text-align:right;color:#9a9a9a;font-size:12px}
+
+/* Project type badges */
+.project-type{display:inline-block;background:#333;color:#fff;padding:4px 12px;border-radius:16px;font-size:12px;margin-bottom:8px}
+
+/* Summary/Details functionality */
+.summary-section {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Timeline as SVG line */
+.timeline-svg {
+  width: 100%;
+  height: 120px;
+  margin: 20px 0;
+}
+
+.timeline-line {
+  stroke: #444;
+  stroke-width: 2;
+  fill: none;
+}
+
+.timeline-dot {
+  fill: #fff;
+  stroke: #888;
+  stroke-width: 1;
+}
+
+.timeline-text {
+  fill: #eaeaea;
+  font-size: 11px;
+  font-family: Inter, system-ui;
+}
+
+.timeline-date {
+  fill: #d0d0d0;
+  font-size: 10px;
+  font-family: Inter, system-ui;
+}
+
+/* Animated SVG icons */
+.animated-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.status-completed { color: #4CAF50; font-weight: bold; }
+.status-progress { color: #FF9800; font-weight: bold; }
+.status-planned { color: #2196F3; font-weight: bold; }
+
+/* Image click to enlarge */
+.clickable-image {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.clickable-image:hover {
+  transform: scale(1.05);
+}
+
+/* Modal for enlarged images */
+.image-modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  cursor: pointer;
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+}
+
+/* Tooltip for Gantt bars */
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: #111;
+  border: 1px solid #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font: 12px/1.2 Inter, system-ui, sans-serif;
+  white-space: nowrap;
+  transform: translate(-50%, -120%);
+  opacity: 0;
+  transition: opacity .12s ease;
+  z-index: 1500;
+}
+
+</style>
+</head>
+<body>
+
+<div class="slideshow-container">
+  <!-- Logo -->
+  <img src="images/SUM_LOGO.png" alt="SUM Logo" class="logo">
+
+  <!-- Slide 1: Cover -->
+  <section class="slide cover active">
+    <h1>SUM VEHÍCULOS – Ventanilla</h1>
+    <p class="subtitle">Portafolio y Roadmap – Slideshow</p>
+    <div class="meta">Fecha: 20 Sep 2025</div>
+  </section>
+
+  <!-- Slide 2: Mesh Wi-Fi (COMPLETADO) - Resumen -->
+  <section class="slide">
+    <div class="project-type">Infraestructura</div>
+    <h2>Mesh Wi‑Fi + Starlink Prioridad</h2>
+    <div class="status-completed">COMPLETADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Se desplegó exitosamente un mesh Wi-Fi con decos TP-LINK X50 y antena adicional, solucionando los problemas críticos de conectividad en todas las zonas operativas. La implementación se realizó en dos fases: del 1 al 5 de septiembre se armó la primera iteración con 4 decos existentes y 3 nuevos adquiridos, pero se detectó insuficiencia. Del 7 al 12 de septiembre se compró una tercera antena y un plan de prioridad para oficinas. Actualmente cada ubicación tiene cobertura dedicada y las quejas de conectividad disminuyeron significativamente.</p>
+      
+      <h4>Distribución Final:</h4>
+      <ul>
+        <li><strong>SUM MESH 1:</strong> Zona de oficinas - Pintura - Bocamaza - Almacén</li>
+        <li><strong>SUM MESH 2:</strong> Isla 5 - Repuestos - Lavado/Recepción/PDI</li>
+        <li><strong>SUM MESH 3:</strong> Control de calidad/Despacho - GLP</li>
+      </ul>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>3 decos TP‑LINK X50 Outdoor + antena de refuerzo</p></div>
+        <div><strong>OPEX</strong><p>Plan Starlink Prioridad 1 TB mensual + 3 Plan Itinerante</p></div>
+        <div><strong>Ahorros logrados</strong><p>Eliminación de micro‑paradas y reconexiones.</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points Resueltos:</h4>
+              <ul>
+                <li>Cobertura insuficiente en zonas críticas (Lavado, Recepción, PDI, CC)</li>
+                <li>Dependencia de datos personales y módems improvisados</li>
+                <li>Subida lenta de fotografías de evidencia (10-15 fotos por auto)</li>
+                <li>Micro-paradas de 3-10 minutos por vehículo por reconexiones</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Logrados:</h4>
+            <ul>
+              <li>Eliminación de tiempo muerto en la subida de fotos</li>
+              <li>Reducción significativa de tiempos muertos</li>
+              <li>Cobertura estable en todas las zonas críticas</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 3: Automatización Reportes (COMPLETADO) -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>Automatización y Unificación de Información</h2>
+    <div class="status-completed">COMPLETADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Durante la semana del 21 al 27 de septiembre se implementó exitosamente un sistema automatizado que extrae reportes de eSUM y diferentes sheets, consolida toda la información y envía reportes condensados por email a los seleccionados. Se desarrollaron múltiples automatizaciones en Google Sheets y un bot que identifica atrasos, calcula tiempos por etapa (mín/avg/máx) y emite cortes por hora, eliminando la carga manual y creando una fuente única de verdad. Todo esto corre en un servidor físico instalado en la misma oficina.</p>
+      
+      <div style="text-align: center; margin: 20px 0;">
+        <img src="images/reportes_automatizados.png" alt="Reportes Automáticos por Email" class="clickable-image" style="max-width: 100%; height: auto; border-radius: 8px;" onclick="enlargeImage(this)">
+        <p class="small">Reportes automáticos que llegan por email con información consolidada</p>
+      </div>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Bajo (desarrollo interno y scripts)</p></div>
+        <div><strong>OPEX</strong><p>Nulo , se corre en servidor físico instalado</p></div>
+        <div><strong>Ahorros logrados</strong><p>Eliminación de horas no productivas armando reportes; reducción de errores y decisiones tardías</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points Resueltos:</h4>
+              <ul>
+                <li>Información fragmentada en múltiples sheets dispersas</li>
+                <li>Carga manual desde ESUM y hojas read-only</li>
+                <li>Tiempo excesivo buscando y validando datos</li>
+                <li>Errores humanos en copias parciales</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Logrados:</h4>
+            <ul>
+              <li>Bot automatizado extrayendo reportes 24/7</li>
+              <li>Fuente única de verdad implementada</li>
+              <li>Cortes automáticos por hora</li>
+              <li>Identificación automática de urgentes por VIN</li>
+              <li>Reducción drástica de errores manuales</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Cabina IA (EN PROGRESO) - Slide 1 de 3 -->
+  <section class="slide">
+    <div class="project-type">IA</div>
+    <h2>Detección de Daños con IA (FocalX / NTA / UVeye)</h2>
+    <div class="status-progress">EN PROGRESO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Proyecto crítico para automatizar la detección de daños, especialmente abolladuras pequeñas (~1 cm) que representan el 35% de todos los daños según estudio interno del Jetour X70. Se evaluaron tres alternativas comerciales: FocalX (app IA con bajo CAPEX), NTA (hardware industrial USD 160k-200k) y UVeye (drive-through modular ~5k USD/mes). La estrategia es iniciar con un piloto de FocalX de 4 semanas para cuantificar recall/precision y reducción de tiempos, con bajo riesgo financiero antes de considerar inversiones mayores.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>FocalX: nulo; NTA: USD 160k–200k; UVeye: hardware (precio a cotizar)</p></div>
+        <div><strong>OPEX</strong><p>FocalX: ~1.5k USD/mes; UVeye: ~5k USD/mes</p></div>
+        <div><strong>Ahorros esperados</strong><p>Menos tiempo de inspección; menos reprocesos; evidencia estandarizada; FPY en alza</p></div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class='pains'>
+            <h4>Pain Points Críticos:</h4>
+            <ul>
+              <li>Dificultad intrínseca para detectar abolladuras pequeñas (~1 cm)</li>
+              <li>35% de daños son abolladuras de hasta 1 cm (estudio Jetour X70)</li>
+              <li>Dependencia del ángulo de observación e iluminación</li>
+              <li>Impacto en tiempos de PDI y reprocesos en CC</li>
+              <li>Costos no planificados cuando emergen en CC</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <h4>Beneficios Esperados:</h4>
+          <ul>
+            <li>Detección automatizada de abolladuras pequeñas</li>
+            <li>Reducción de falsos negativos</li>
+            <li>Menor tiempo de inspección manual</li>
+            <li>Evidencia fotográfica estandarizada</li>
+            <li>Reducción de reprocesos en Control de Calidad</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 5: Cabina IA - Comparativa (Slide 2 de 3) -->
+  <section class="slide">
+    <h2>Comparativa de soluciones – IA</h2>
+    <table class='table'>
+      <thead>
+        <tr><th>Criterio</th><th>FocalX</th><th>NTA</th><th>UVeye</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Tipo</td><td>App/Web + IA; captura 360° guiada</td><td>Estación 4‑en‑1 (arco 360°, bajos, neumáticos, laterales)</td><td>Drive‑through (Atlas/Helios/Artemis; +Apollo interiores)</td></tr>
+        <tr><td>Infraestructura</td><td>Smartphone/Tablet; nube (AWS)</td><td>Hardware industrial; servidor on‑prem</td><td>Hardware modular; nube UVeye</td></tr>
+        <tr><td>Precisión</td><td>Limitada en pruebas internas; falsos positivos; abolladuras pequeñas no detectadas</td><td>Daños ~5 mm; neumáticos 0.1 mm</td><td>Exterior ~0.5 mm; sub‑mm neumáticos</td></tr>
+        <tr><td>Velocidad</td><td>Captura 1–3 min; pruebas internas 20–30 min procesado (comercial: segundos)</td><td>≈10 s por vehículo</td><td>< 10 s por vehículo</td></tr>
+        <tr><td>Pago</td><td>Suscripción (bajo CAPEX)</td><td>Compra única USD 160k–200k</td><td>Hardware + suscripción ~5k USD/mes (público)</td></tr>
+        <tr><td>Clientes</td><td>Sixt, Europcar, ColserAuto</td><td>Mercedes‑Benz, Porsche, Audi</td><td>Amazon, Toyota, Volvo, GM</td></tr>
+        <tr><td>Integración</td><td>API + SDK</td><td>API + SDK</td><td>API</td></tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 24px;">
+      <h3>Sistemas en Evaluación</h3>
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div style="text-align: center;">
+          <img src="images/FOCALX_IMG1.jpeg" alt="FocalX Software" class="clickable-image" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;" onclick="enlargeImage(this)">
+          <h4>FocalX - App IA</h4>
+          <p>Software basado en smartphone/tablet con captura guiada 360°</p>
+        </div>
+        <div style="text-align: center;">
+          <img src="images/NTA_IMG1.jpeg" alt="Sistema NTA 4-en-1" class="clickable-image" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;" onclick="enlargeImage(this)">
+          <h4>NTA - Sistema 4-en-1</h4>
+          <p>Estación industrial con arco 360°, bajos, neumáticos y laterales</p>
+        </div>
+      </div>
+      
+      <h3>Por qué FocalX este mes</h3>
+      <p><strong>Razonamiento:</strong> Sin CAPEX inicial y despliegue inmediato. El piloto de 4 semanas ofrece una vía de bajo riesgo para validar desempeño comercial en entorno real. Si no cumple umbrales, tendremos evidencia objetiva para justificar la inversión en NTA o UVeye.</p>
+    </div>
+  </section>
+
+  <!-- Slide 6: Cabina IA - Cómo Mediremos (Slide 3 de 3) -->
+  <section class="slide">
+    <h2>Detección de Daños con IA - Cómo Mediremos en el Mes</h2>
+    
+    <div class="grid-2">
+      <div>
+        <h3>Métricas Técnicas Explicadas</h3>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="images/abolladura_detectar.png" alt="Tamaño de abolladuras a detectar" class="clickable-image" style="max-width: 100%; height: auto; border-radius: 8px;" onclick="enlargeImage(this)">
+          <p class="small">Abolladuras típicas que queremos detectar (~1 cm)</p>
+        </div>
+        
+        <h4>Recall (Sensibilidad)</h4>
+        <p>De todos los daños reales que existen, ¿cuántos detecta el sistema? Si hay 100 abolladuras reales y detecta 90, el recall es 90%. <strong>Meta: ≥90%</strong></p>
+        
+        <h4>Precision (Exactitud)</h4>
+        <p>De todas las alertas que genera el sistema, ¿cuántas son realmente daños? Si marca 100 daños y 85 son reales, la precisión es 85%. <strong>Meta: ≥70%</strong></p>
+
+      </div>
+      
+      <div>
+        <h3>Plan de Medición - Octubre 2025</h3>
+        
+        <h4>Validación </h4>
+        <p>Los validadores revisarán cada vehículo después del sistema IA para confirmar qué detecciones son correctas.</p>
+        
+        <div style="background: #111; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+          <h4>Semana 1 (1-4 Oct): Setup</h4>
+          <p>• Zona de captura preparada<br>
+          • Protocolo de fotos definido<br>
+          • Validadores entrenados para validación</p>
+        </div>
+        
+        <div style="background: #111; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+          <h4>Semana 1-3 (1-20 Oct): Operación</h4>
+          <p>• Mínimo 100 vehículos procesados<br>
+          • Doble revisión: IA + validador<br>
+          • Registro de todos los resultados</p>
+        </div>
+        
+        <div style="background: #111; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+          <h4>Semana 4 (27 Oct): Decisión</h4>
+          <p>• Cálculo final de métricas<br>
+          • Análisis de tiempo ahorrado<br>
+          • Go/No-Go para implementación</p>
+        </div>
+        
+        <h4>Criterios de Éxito</h4>
+        <ul>
+          <li>90% de Recall</li>
+          <li>70% de Precision</li>
+          <li>Reduce tiempo de inspección en 40%</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 7: Cámaras + Video Wall -->
+  <section class="slide">
+    <div class="project-type">Infraestructura</div>
+    <h2>Cámaras + Video Wall</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Reconfiguración y optimización del sistema de cámaras existentes Topo C500 para crear un sistema de monitoreo integral con video wall central. El objetivo es supervisar la productividad del personal y detectar incidentes como choques, con transmisión en tiempo real en pantalla central. El proyecto aprovecha la infraestructura de cámaras ya instalada, enfocándose en la reconfiguración y búsqueda de soluciones para streaming en vivo. Futuro desarrollo incluye integración con IA para detección automática de incidentes.</p>
+      
+      <div style="text-align: center; margin: 20px 0;">
+        <img src="images/CAMARAS.jpeg" alt="Sistema de Cámaras Instalado" class="clickable-image" style="max-width: 25%; height: auto; border-radius: 8px;" onclick="enlargeImage(this)">
+        <p class="small">Sistema de cámaras Topo C500 ya instalado en las zonas críticas</p>
+      </div>
+      
+      <h4>Configuración del Sistema:</h4>
+      <ul>
+        <li><strong>Cámara 1:</strong> Control de Calidad/Despacho</li>
+        <li><strong>Cámara 2:</strong> Recepción/Lavado/PDI</li>
+        <li><strong>Cámara 3:</strong> Pintura</li>
+        <li><strong>TV 40":</strong> En oficina mostrando todas las cámaras y métricas de reportes automatizados</li>
+      </ul>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Reconfiguración cámaras existentes,Instalación TV/video wall</p></div>
+        <div><strong>OPEX</strong><p>Mantenmiento básico</p></div>
+        <div><strong>Ahorros esperados</strong><p>Monitoreo continuo, detección temprana de incidentes, mejor supervisión</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Monitoreo en tiempo real limitado sin video wall central</li>
+                <li>Dificultad para supervisar múltiples zonas simultáneamente</li>
+                <li>Detección tardía de incidentes y choques</li>
+                <li>Falta de evidencia visual para auditorías</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Monitoreo 24/7 de todas las zonas críticas</li>
+              <li>Identificación de culpables de choques e incidentes</li>
+              <li>Supervisión efectiva de productividad</li>
+              <li>Evidencia confiable para auditorías</li>
+            </ul>
+          </div>
+        </div>
+        
+        <svg class="timeline-svg" viewBox="0 0 800 120">
+          <line class="timeline-line" x1="50" y1="60" x2="700" y2="60"/>
+          <circle class="timeline-dot" cx="150" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="350" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="550" cy="60" r="4"/>
+          <text class="timeline-date" x="150" y="45" text-anchor="middle">Sep 25</text>
+          <text class="timeline-date" x="350" y="45" text-anchor="middle">Sep 30</text>
+          <text class="timeline-date" x="550" y="45" text-anchor="middle">Próximamente</text>
+          <text class="timeline-text" x="150" y="85" text-anchor="middle">Reconfiguración</text>
+          <text class="timeline-text" x="350" y="85" text-anchor="middle">TV 40" Oficinas</text>
+          <text class="timeline-text" x="550" y="85" text-anchor="middle">Integración IA</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 8: SUMbot WhatsApp -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>SUMbot (WhatsApp) – Admin & Clientes</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Desarrollo de un bot conversacional en WhatsApp con roles diferenciados para Administradores y Clientes, que permita consultar estados de vehículos, atrasos, reprogramaciones  en tiempo real. El sistema se integrará con diferentes sheets actuales y eSUM para proveer respuestas automáticas consistentes, reducir llamadas y correos, y mejorar significativamente la experiencia del cliente. Incluye trazabilidad completa de consultas y capacidad de escalamiento automático.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Integración con WhatsApp Business API y desarrollo</p></div>
+        <div><strong>OPEX</strong><p>Mensajería, hosting, monitoreo y mantenimiento</p></div>
+        <div><strong>Ahorros esperados</strong><p>Menos llamadas y correos; decisiones más rápidas; mejor experiencia de cliente</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Tiempos de respuesta altos para preguntas operativas básicas</li>
+                <li>Saturación de equipos con consultas manuales</li>
+                <li>Falta de canal inmediato para clientes</li>
+                <li>Cadenas de correo difíciles de rastrear</li>
+                <li>Consultas fuera del horario de oficina</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Canal conversacional 24/7 automatizado</li>
+              <li>Respuestas consistentes en tiempo real</li>
+              <li>Reducción drástica de interacciones manuales</li>
+              <li>Trazabilidad completa de consultas</li>
+              <li>Mejor experiencia para importadoras y concesionarios</li>
+            </ul>
+          </div>
+        </div>
+        
+        <svg class="timeline-svg" viewBox="0 0 800 120">
+          <line class="timeline-line" x1="50" y1="60" x2="750" y2="60"/>
+          <circle class="timeline-dot" cx="200" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="400" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="600" cy="60" r="4"/>
+          <text class="timeline-date" x="200" y="45" text-anchor="middle">Oct 18</text>
+          <text class="timeline-date" x="400" y="45" text-anchor="middle">Nov 7</text>
+          <text class="timeline-date" x="600" y="45" text-anchor="middle">Dic 5</text>
+          <text class="timeline-text" x="200" y="85" text-anchor="middle">Diseño</text>
+          <text class="timeline-text" x="400" y="85" text-anchor="middle">Integraciones</text>
+          <text class="timeline-text" x="600" y="85" text-anchor="middle">Piloto</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 9: Ubicación Exacta por Celda -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>Ubicación Exacta por Celda</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Implementación de un sistema de localización por celda específica para eliminar ambigüedades en la ubicación de vehículos. Se realizará A/B testing comparando dos tecnologías: QR+grid (bajo costo) y BLE/UWB (balizas de proximidad). El objetivo es eliminar búsquedas manuales e integrarlo con eSUM para mostrar la celda exacta en tiempo real.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Tags, antenas/sensores o cámaras, según opción elegida</p></div>
+        <div><strong>OPEX</strong><p>Mantenimiento de infraestructura</p></div>
+        <div><strong>Ahorros esperados</strong><p>Menos tiempo buscando vehículos; menor tasa de errores de asignación</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Localización a nivel 'isla' genera ambigüedades</li>
+                <li>Búsquedas manuales entre celdas</li>
+                <li>Confusiones con nombres de celdas</li>
+                <li>Traslados no registrados</li>
+                <li>Desalineaciones entre eSUM y realidad</li>
+                <li>Demoras en entregas en días pico</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Localización</li>
+              <li>Integración completa con eSUM</li>
+              <li>Eliminación de búsquedas manuales</li>
+              <li>Trazabilidad completa de movimientos</li>
+
+            </ul>
+          </div>
+        </div>
+        
+        <svg class="timeline-svg" viewBox="0 0 800 120">
+          <line class="timeline-line" x1="50" y1="60" x2="750" y2="60"/>
+          <circle class="timeline-dot" cx="150" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="300" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="550" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="700" cy="60" r="4"/>
+          <text class="timeline-date" x="150" y="45" text-anchor="middle">Oct 15</text>
+          <text class="timeline-date" x="300" y="45" text-anchor="middle">Nov 10</text>
+          <text class="timeline-date" x="550" y="45" text-anchor="middle">Ene 20</text>
+          <text class="timeline-date" x="700" y="45" text-anchor="middle">Feb 10</text>
+          <text class="timeline-text" x="150" y="85" text-anchor="middle">Diseño</text>
+          <text class="timeline-text" x="300" y="85" text-anchor="middle">A/B Testing</text>
+          <text class="timeline-text" x="550" y="85" text-anchor="middle">Decisión</text>
+          <text class="timeline-text" x="700" y="85" text-anchor="middle">Despliegue</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 10: Carretilla Motorizada -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>Carretilla Motorizada</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Desarrollo de un prototipo de carretilla motorizada con control remoto para movimientos autónomos de cargas pesadas superiores a 30 kg dentro de plataforma 1, eliminando la dependencia de disponibilidad de van.El objetivo es lograr continuidad del flujo sin esperas y reducir el esfuerzo físico de los operarios.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Motor, control, chasis, baterías; prototipado y señalización</p></div>
+        <div><strong>OPEX</strong><p>Mantenimiento preventivo y repuestos menores</p></div>
+        <div><strong>Ahorros esperados</strong><p>Reducción de esperas; continuidad del flujo; menor esfuerzo físico</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Traslado de cargas >30 kg depende de van</li>
+                <li>Esperas por disponibilidad de van</li>
+                <li>Esfuerzo físico no sostenible</li>
+                <li>Riesgo de incidentes con carretillas manuales</li>
+                <li>Cuellos de botella en diferentes procesos que esperan a la carretilla</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Movimientos autónomos sin depender de van</li>
+              <li>Reducción de tiempos de espera</li>
+              <li>Menor esfuerzo físico para operarios</li>
+              <li>Mayor seguridad operativa</li>
+            </ul>
+          </div>
+        </div>
+        
+        <svg class="timeline-svg" viewBox="0 0 800 120">
+          <line class="timeline-line" x1="50" y1="60" x2="750" y2="60"/>
+          <circle class="timeline-dot" cx="200" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="400" cy="60" r="4"/>
+          <circle class="timeline-dot" cx="600" cy="60" r="4"/>
+          <text class="timeline-date" x="200" y="45" text-anchor="middle">Oct 9</text>
+          <text class="timeline-date" x="400" y="45" text-anchor="middle">Nov 4</text>
+          <text class="timeline-date" x="600" y="45" text-anchor="middle">Dic 12</text>
+          <text class="timeline-text" x="200" y="85" text-anchor="middle">Diseño</text>
+          <text class="timeline-text" x="400" y="85" text-anchor="middle">Prototipo</text>
+          <text class="timeline-text" x="600" y="85" text-anchor="middle">Piloto</text>
+        </svg>
+        
+        <div style="margin-top: 20px;">
+          <h4>Próximos pasos:</h4>
+          <p>Si el prototipo cumple con los criterios de seguridad y eficiencia, se procederá al Stage 2: desarrollo de versión semiautónoma con guiado automático por rutas predefinidas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 11: ESUM 2.0 -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>ESUM 2.0 Unificado</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Desarrollo de una plataforma ESUM 2.0 unificada que consolide las tres plataformas actuales (interno, dealer, clientes) en un sistema modular, modelado de procesos paralelos, checklists configurables y arquitectura de microservicios, evitando caídas. La nueva plataforma incluirá API pública robusta, módulos para integraciones, y migración progresiva sin interrumpir la operación actual. Implementará buenas prácticas de ingeniería de software y permitirá escalabilidad horizontal.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Diseño/Desarrollo del MVP y pruebas de aceptación</p></div>
+        <div><strong>OPEX</strong><p>Hosting, monitoreo y soporte especializado</p></div>
+        <div><strong>Ahorros esperados</strong><p>Menor fricción operativa; alta de procesos más rápida; trazabilidad centralizada</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Fragmentación en 3 plataformas separadas</li>
+                <li>Mantenimiento complejo y duplicado</li>
+                <li>Checklists rígidos sin flexibilidad</li>
+                <li>Control de acceso limitado y no granular</li>
+                <li>Dificultad para auditoría fina</li>
+                <li>Flujos paralelos mal modelados</li>
+                <li>Caídas de plataforma</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Checklists configurables por proceso</li>
+              <li>Modelado correcto de flujos paralelos</li>
+              <li>API pública robusta para integraciones</li>
+              <li>Migración sin interrumpir operación</li>
+              <li>Arquitectura escalable y mantenible</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style="text-align: center; padding: 40px; background: #111; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #888; margin-bottom: 10px;">EN PLANIFICACIÓN</h3>
+          <p style="color: #aaa; font-size: 14px;">Proyecto programado para 2026<br>Fechas por definir según prioridades</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 12: Lavado y Secado -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>Lavado y Secado Automatizado</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Instalación y puesta en marcha de la máquina de lavado y secado automatizado ya adquirida para estandarizar tiempos y calidad al inicio del flujo PDI. El proyecto eliminará el cuello de botella inicial causado por la variabilidad del lavado manual y la dependencia de factores externos. Se desarrollará documentación completa.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Máquina ya adquirida  + instalación</p></div>
+        <div><strong>OPEX</strong><p>Consumo de agua/energía y mantenimiento programado</p></div>
+        <div><strong>Ahorros esperados</strong><p>Mayor vehículos/hora; reducción de re-lavados y variabilidad</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Cuello de botella inicial del flujo PDI</li>
+                <li>Lavado manual sensible a agua/energía</li>
+                <li>Variabilidad en tiempos y calidad</li>
+                <li>Máquina automática sin documentación de montaje</li>
+                <li>Inconsistencia propaga retrasos a Recepción/PDI</li>
+                <li>Re-lavados por suciedad persistente</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Tiempos estandarizados de lavado</li>
+              <li>Calidad consistente al inicio del flujo</li>
+              <li>Mayor throughput de vehículos/hora</li>
+              <li>Reducción significativa de re-lavados</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style="text-align: center; padding: 40px; background: #111; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #888; margin-bottom: 10px;">EN PLANIFICACIÓN</h3>
+          <p style="color: #aaa; font-size: 14px;">Proyecto programado para 2026<br>Fechas por definir según disponibilidad de recursos</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 13: Pulidora Automática -->
+  <section class="slide">
+    <div class="project-type">Optimización de Procesos</div>
+    <h2>Pulidora Automática de Aros</h2>
+    <div class="status-planned">PLANIFICADO</div>
+    
+    <div class="summary-section">
+      <h3><svg class="animated-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v2M2 12h2M20 12h2M12 20v2"/></svg> Resumen del Proyecto</h3>
+      <p>Diseño y construcción de un sistema automatizado con torno y control de trayectorias para estabilizar los parámetros de pulido (velocidad, presión, pasadas) y lograr acabados consistentes en aros. El sistema incluirá cabina de seguridad, extracción de partículas y sensórica para monitoreo de calidad en tiempo real. El objetivo es reducir el tiempo por aro, elevar la calidad superficial y eliminar los riesgos de seguridad del proceso manual actual.</p>
+
+      <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M7 6v12M17 6v12"/></svg> Análisis de costos</h3>
+      <div class="costs">
+        <div><strong>CAPEX</strong><p>Torno, actuadores, sensórica y cabina/jaula de seguridad</p></div>
+        <div><strong>OPEX</strong><p>Abrasivos/consumibles y mantenimiento de actuadores</p></div>
+        <div><strong>Ahorros esperados</strong><p>Menor tiempo por aro; menor tasa de retrabajos; seguridad mejorada</p></div>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #333;">
+        <div class="grid-2">
+          <div>
+            <div class='pains'>
+              <h4>Pain Points a Resolver:</h4>
+              <ul>
+                <li>Proceso manual con variabilidad inherente</li>
+                <li>Calidad depende de pericia del operador</li>
+                <li>Presión, tiempo y trayectoria inconsistentes</li>
+                <li>Riesgos de seguridad y ergonomía</li>
+                <li>Exposición a partículas sin encapsulamiento</li>
+                <li>Probabilidad de retrabajo por calidad variable</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <h4>Resultados Esperados:</h4>
+            <ul>
+              <li>Parámetros de pulido estabilizados</li>
+              <li>Acabados consistentes y repetibles</li>
+              <li>Menor tiempo por aro procesado</li>
+              <li>Reducción significativa de retrabajos</li>
+              <li>Seguridad mejorada con encapsulamiento</li>
+              <li>Cumplimiento de normativas de seguridad</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div style="text-align: center; padding: 40px; background: #111; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #888; margin-bottom: 10px;">EN PLANIFICACIÓN</h3>
+          <p style="color: #aaa; font-size: 14px;">Proyecto programado para 2026<br>Fechas por definir según prioridades de automatización</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 14: Gantt Mejorado -->
+  <section class="slide">
+    <h2>Roadmap Global 2025</h2>
+    <div class="gantt-wrap">
+      <svg viewBox="0 0 1300 400" class="gantt">
+        <style>
+          .gtick { stroke:#2b2b2b; }
+          .gtlabel { fill:#c8c8c8; font:11px Inter, system-ui; }
+          .glabel { fill:#eaeaea; font:10px Inter, system-ui; }
+          .project-title { fill:#eaeaea; font:10px Inter, system-ui; }
+          .gbar { fill:#fff; opacity:.9; }
+          .g-done { fill:#4CAF50; }
+          .g-progress { fill:#FF9800; }
+          .g-planned { fill:#2196F3; }
+        </style>
+        
+        <!-- Background -->
+        <rect x="0" y="0" width="1300" height="400" fill="#0c0c0c"/>
+        
+        <!-- Month headers (first row) -->
+        <text class='gtlabel' x='300' y='20'>SEPTIEMBRE</text>
+        <text class='gtlabel' x='550' y='20'>OCTUBRE</text>
+        <text class='gtlabel' x='800' y='20'>NOVIEMBRE</text>
+        <text class='gtlabel' x='1050' y='20'>DICIEMBRE</text>
+        
+        <!-- Month separators (thick lines) -->
+        <line x1='200' y1='25' x2='200' y2='350' stroke='#666' stroke-width='2'/>
+        <line x1='450' y1='25' x2='450' y2='350' stroke='#666' stroke-width='2'/>
+        <line x1='700' y1='25' x2='700' y2='350' stroke='#666' stroke-width='2'/>
+        <line x1='950' y1='25' x2='950' y2='350' stroke='#666' stroke-width='2'/>
+        <line x1='1200' y1='25' x2='1200' y2='350' stroke='#666' stroke-width='2'/>
+        
+        <!-- Week headers (second row) - centers of each week -->
+        <!-- Septiembre -->
+        <text class='gtlabel' x='231.25' y='40'>S1</text>
+        <text class='gtlabel' x='293.75' y='40'>S2</text>
+        <text class='gtlabel' x='356.25' y='40'>S3</text>
+        <text class='gtlabel' x='418.75' y='40'>S4</text>
+        <!-- Octubre -->
+        <text class='gtlabel' x='481.25' y='40'>S1</text>
+        <text class='gtlabel' x='543.75' y='40'>S2</text>
+        <text class='gtlabel' x='606.25' y='40'>S3</text>
+        <text class='gtlabel' x='668.75' y='40'>S4</text>
+        <!-- Noviembre -->
+        <text class='gtlabel' x='731.25' y='40'>S1</text>
+        <text class='gtlabel' x='793.75' y='40'>S2</text>
+        <text class='gtlabel' x='856.25' y='40'>S3</text>
+        <text class='gtlabel' x='918.75' y='40'>S4</text>
+        <!-- Diciembre -->
+        <text class='gtlabel' x='981.25' y='40'>S1</text>
+        <text class='gtlabel' x='1043.75' y='40'>S2</text>
+        <text class='gtlabel' x='1106.25' y='40'>S3</text>
+        <text class='gtlabel' x='1168.75' y='40'>S4</text>
+        
+        <!-- Week separators (thin lines) at week boundaries -->
+        <!-- Septiembre boundaries -->
+        <line x1='262.5' y1='45' x2='262.5' y2='350' class='gtick'/>
+        <line x1='325' y1='45' x2='325' y2='350' class='gtick'/>
+        <line x1='387.5' y1='45' x2='387.5' y2='350' class='gtick'/>
+        <!-- Octubre boundaries -->
+        <line x1='512.5' y1='45' x2='512.5' y2='350' class='gtick'/>
+        <line x1='575' y1='45' x2='575' y2='350' class='gtick'/>
+        <line x1='637.5' y1='45' x2='637.5' y2='350' class='gtick'/>
+        <!-- Noviembre boundaries -->
+        <line x1='762.5' y1='45' x2='762.5' y2='350' class='gtick'/>
+        <line x1='825' y1='45' x2='825' y2='350' class='gtick'/>
+        <line x1='887.5' y1='45' x2='887.5' y2='350' class='gtick'/>
+        <!-- Diciembre boundaries -->
+        <line x1='1012.5' y1='45' x2='1012.5' y2='350' class='gtick'/>
+        <line x1='1075' y1='45' x2='1075' y2='350' class='gtick'/>
+        <line x1='1137.5' y1='45' x2='1137.5' y2='350' class='gtick'/>
+        
+        <!-- Project bars with titles (Solo 2025) -->
+        <!-- Mesh WiFi (COMPLETADO) Sep 1–12 (S1–S2) -->
+        <text class='project-title' x='20' y='85'>Mesh WiFi + Starlink</text>
+        <rect class='gbar g-done gantt-bar' data-tip="Mesh Wi‑Fi + Starlink: 01–12 Sep 2025" x='200' y='75' width='125' height='18' rx='4'></rect>
+        
+        <!-- Automatización Reportes (COMPLETADO) Sep 21–27 (S4) -->
+        <text class='project-title' x='20' y='110'>Automatización Reportes</text>
+        <rect class='gbar g-done gantt-bar' data-tip="Automatización de Reportes: 14–27 Sep 2025" x='325' y='100' width='125' height='18' rx='4'></rect>
+        
+        <!-- Unificación Sheets (PLANIFICADO) Todo Noviembre -->
+        <text class='project-title' x='20' y='135'>Unificación de Sheets</text>
+        <rect class='gbar g-planned gantt-bar' data-tip="Unificación de Sheets: 01–30 Nov 2025" x='700' y='125' width='250' height='18' rx='4'></rect>
+        
+        <!-- Cabina IA (EN PROGRESO) Oct 6–27 (S2–S4) -->
+        <text class='project-title' x='20' y='160'>Cabina IA (FocalX)</text>
+        <rect class='gbar g-progress gantt-bar' data-tip="Cabina IA (FocalX): 01–27 Oct 2025" x='450' y='150' width='187.5' height='18' rx='4'></rect>
+        
+        <!-- Cámaras (COMPLETADO) Sep 25–30 (S3–S4) -->
+        <text class='project-title' x='20' y='185'>Cámaras + Video Wall</text>
+        <rect class='gbar g-done gantt-bar' data-tip="Cámaras + Video Wall: 25–30 Sep 2025" x='325' y='175' width='125' height='18' rx='4'></rect>
+        
+        <!-- SUMbot Todo Octubre (S1–S4) -->
+        <text class='project-title' x='20' y='210'>SUMbot WhatsApp</text>
+        <rect class='gbar g-planned gantt-bar' data-tip="SUMbot WhatsApp: 01–31 Oct 2025" x='450' y='200' width='250' height='18' rx='4'></rect>
+        
+        <!-- Ubicación por Celda (A/B Testing) Todo Noviembre -->
+        <text class='project-title' x='20' y='235'>Ubicación por Celda</text>
+        <rect class='gbar g-planned gantt-bar' data-tip="Ubicación por Celda (A/B Testing): 01–30 Nov 2025" x='700' y='225' width='250' height='18' rx='4'></rect>
+        
+        <!-- Carretilla Nov finales – Dic finales (S4 Nov – S4 Dic) -->
+        <text class='project-title' x='20' y='260'>Carretilla Motorizada</text>
+        <rect class='gbar g-planned gantt-bar' data-tip="Carretilla Motorizada: 24 Nov – 31 Dic 2025" x='887.5' y='250' width='312.5' height='18' rx='4'></rect>
+        
+        <!-- Legend -->
+        <text class='gtlabel' x='20' y='310'>Leyenda:</text>
+        <rect class='gbar g-done' x='20' y='325' width='20' height='12' rx='2'/>
+        <text class='project-title' x='50' y='335'>Completado</text>
+        <rect class='gbar g-progress' x='150' y='325' width='20' height='12' rx='2'/>
+        <text class='project-title' x='180' y='335'>En Progreso</text>
+        <rect class='gbar g-planned' x='280' y='325' width='20' height='12' rx='2'/>
+        <text class='project-title' x='310' y='335'>Planificado</text>
+        
+        <!-- Nota sobre proyectos 2026 -->
+        <text class='project-title' x='20' y='365' fill='#888' font-size='11px'>* Proyectos ESUM 2.0, Lavado y Pulidora están en planificación para 2026</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <button class="nav-arrow prev" onclick="changeSlide(-1)">‹</button>
+  <button class="nav-arrow next" onclick="changeSlide(1)">›</button>
+  
+  <!-- Slide counter -->
+  <div class="slide-counter">
+    <span id="current-slide">1</span> / <span id="total-slides">14</span>
+  </div>
+</div>
+
+<!-- Modal for image enlargement -->
+<div id="imageModal" class="image-modal">
+  <img class="modal-content" id="modalImg">
+</div>
+
+<script>
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+
+document.getElementById('total-slides').textContent = totalSlides;
+
+function showSlide(n) {
+  slides[currentSlide].classList.remove('active');
+  currentSlide = (n + totalSlides) % totalSlides;
+  slides[currentSlide].classList.add('active');
+  document.getElementById('current-slide').textContent = currentSlide + 1;
+}
+
+function changeSlide(direction) {
+  showSlide(currentSlide + direction);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  switch(e.key) {
+    case 'ArrowLeft':
+    case 'ArrowUp':
+    case 'PageUp':
+      changeSlide(-1);
+      e.preventDefault();
+      break;
+    case 'ArrowRight':
+    case 'ArrowDown':
+    case 'PageDown':
+    case ' ':
+      changeSlide(1);
+      e.preventDefault();
+      break;
+    case 'Home':
+      showSlide(0);
+      e.preventDefault();
+      break;
+    case 'End':
+      showSlide(totalSlides - 1);
+      e.preventDefault();
+      break;
+  }
+});
+
+// Image enlargement functionality
+function enlargeImage(img) {
+  // Create modal
+  const modal = document.createElement('div');
+  modal.className = 'image-modal';
+  modal.style.display = 'block';
+  
+  // Create enlarged image
+  const enlargedImg = document.createElement('img');
+  enlargedImg.src = img.src;
+  enlargedImg.alt = img.alt;
+  enlargedImg.className = 'modal-content';
+  
+  modal.appendChild(enlargedImg);
+  document.body.appendChild(modal);
+  
+  // Close modal when clicked
+  modal.onclick = function() {
+    document.body.removeChild(modal);
+  };
+}
+
+// Custom tooltip for gantt bars
+const tooltip = document.createElement('div');
+tooltip.className = 'tooltip';
+document.body.appendChild(tooltip);
+
+function attachGanttTooltips() {
+  const bars = document.querySelectorAll('.gantt-bar');
+  bars.forEach(bar => {
+    bar.addEventListener('mousemove', (e) => {
+      const tip = bar.getAttribute('data-tip');
+      if (!tip) return;
+      tooltip.textContent = tip;
+      tooltip.style.left = `${e.clientX}px`;
+      tooltip.style.top = `${e.clientY - 10}px`;
+      tooltip.style.opacity = '1';
+    });
+    bar.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+    });
+  });
+}
+
+// Initialize
+showSlide(0);
+// Attach tooltips after initial render
+attachGanttTooltips();
+</script>
+
+</body>
+</html>
